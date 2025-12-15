@@ -115,6 +115,9 @@ export default function Presentation() {
     const currentSlideRef = useRef(0);
     const isPlayingRef = useRef(false);
     const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+    const playSlideRequestId = useRef(0); // Track request IDs to prevent stale calls
+    const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null); // Track current utterance for cancellation
+    const currentUtteranceResolverRef = useRef<(() => void) | null>(null); // Track resolver to resolve on cancel
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -151,7 +154,16 @@ export default function Presentation() {
         
         return () => {
             mounted.current = false;
+            // Increment request ID to invalidate any pending calls
+            playSlideRequestId.current++;
             window.speechSynthesis.cancel();
+            stopHumeAudio();
+            // Resolve any pending browser TTS promise
+            if (currentUtteranceResolverRef.current) {
+                currentUtteranceResolverRef.current();
+                currentUtteranceResolverRef.current = null;
+            }
+            currentUtteranceRef.current = null;
         };
     }, []);
 
@@ -174,8 +186,22 @@ export default function Presentation() {
                 resolve(); 
                 return; 
             }
-            speechSynth.cancel();
+            
+            // Cancel any previous utterance and resolve its promise
+            if (currentUtteranceRef.current) {
+                speechSynth.cancel();
+                if (currentUtteranceResolverRef.current) {
+                    console.log("🔊 [SPEAK] Resolving previous utterance promise on cancel");
+                    currentUtteranceResolverRef.current();
+                    currentUtteranceResolverRef.current = null;
+                }
+            }
+            
+            speechSynth.cancel(); // Ensure clean state
             const utterance = new SpeechSynthesisUtterance(text);
+            currentUtteranceRef.current = utterance; // Track for cancellation
+            currentUtteranceResolverRef.current = resolve; // Store resolver
+            
             utterance.rate = 0.9; // Slightly slower for clarity
             utterance.pitch = 1.0;
             
@@ -198,6 +224,16 @@ export default function Presentation() {
             }
 
             let utteranceStarted = false;
+            let resolved = false; // Prevent double resolution
+            
+            const safeResolve = () => {
+                if (!resolved) {
+                    resolved = true;
+                    currentUtteranceRef.current = null;
+                    currentUtteranceResolverRef.current = null;
+                    resolve();
+                }
+            };
             
             utterance.onstart = () => {
                 console.log("🔊 [SPEAK] Browser TTS started");
@@ -206,22 +242,22 @@ export default function Presentation() {
             
             utterance.onend = () => {
                 console.log("🔊 [SPEAK] Browser TTS finished");
-                resolve();
+                safeResolve();
             };
             
             utterance.onerror = (e) => {
                 console.error("🔊 [SPEAK] Browser TTS error:", e);
                 // Still resolve so presentation can continue
-                resolve();
+                safeResolve();
             };
 
             speechSynth.speak(utterance);
             
             // Safety timeout: if TTS doesn't start within 3 seconds, resolve anyway
             setTimeout(() => {
-                if (!utteranceStarted) {
+                if (!utteranceStarted && !resolved) {
                     console.warn("🔊 [SPEAK] Browser TTS did not start within timeout");
-                    resolve();
+                    safeResolve();
                 }
             }, 3000);
         });
@@ -233,15 +269,25 @@ export default function Presentation() {
     };
 
     const playSlide = async (index: number) => {
-        console.log("📽️ [SLIDE] Playing slide:", index);
+        // Generate a new request ID for this call
+        const requestId = ++playSlideRequestId.current;
+        console.log("📽️ [SLIDE] Playing slide:", index, "Request ID:", requestId);
 
         if (index >= SCRIPT.length) {
             console.log("📽️ [SLIDE] Reached end of presentation!");
             // After the final slide, show a brief pause then return to start screen
             setTimeout(() => {
-                setIsPlaying(false);
-                setCurrentSlide(0);
+                if (requestId === playSlideRequestId.current && mounted.current) {
+                    setIsPlaying(false);
+                    setCurrentSlide(0);
+                }
             }, 2000);
+            return;
+        }
+
+        // Check if this is a stale call (newer request started)
+        if (requestId !== playSlideRequestId.current) {
+            console.log("📽️ [SLIDE] Stale call ignored, request ID:", requestId);
             return;
         }
 
@@ -253,6 +299,13 @@ export default function Presentation() {
         // This ensures each slide plays fully before moving to the next
         try {
             await speak(slide.text, slide.emotion);
+            
+            // Check if this is still the active request (user might have skipped)
+            if (requestId !== playSlideRequestId.current) {
+                console.log("📽️ [SLIDE] Request superseded, not advancing");
+                return;
+            }
+            
             console.log("📽️ [SLIDE] Speech completed for slide:", index);
             console.log("📽️ [SLIDE] mounted.current =", mounted.current);
 
@@ -268,16 +321,18 @@ export default function Presentation() {
             
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // Double-check we should still advance
-            if (mounted.current && isPlayingRef.current) {
+            // Triple-check: request ID, mounted, and playing
+            if (requestId === playSlideRequestId.current && mounted.current && isPlayingRef.current) {
                 console.log("📽️ [SLIDE] Timer fired, calling playSlide(" + nextIndex + ")");
                 playSlide(nextIndex);
+            } else {
+                console.log("📽️ [SLIDE] Conditions changed, not advancing");
             }
         } catch (error) {
             console.error("📽️ [SLIDE] Error during speech:", error);
-            // On error, still advance after a delay
+            // On error, still advance after a delay (if still active)
             setTimeout(() => {
-                if (mounted.current && isPlayingRef.current) {
+                if (requestId === playSlideRequestId.current && mounted.current && isPlayingRef.current) {
                     playSlide(index + 1);
                 }
             }, 1000);
@@ -286,44 +341,46 @@ export default function Presentation() {
 
     const stop = () => {
         setIsPlaying(false);
-        stopHumeAudio(); // Kill Hume audio
-        if (speechSynth) speechSynth.cancel(); // Kill browser TTS
+        // Increment request ID to invalidate any pending playSlide calls
+        playSlideRequestId.current++;
+        stopHumeAudio(); // Kill Hume audio (this now resolves its promise)
+        
+        // Kill browser TTS and resolve its promise
+        if (speechSynth) {
+            speechSynth.cancel();
+            if (currentUtteranceResolverRef.current) {
+                console.log("🔊 [STOP] Resolving browser TTS promise on stop");
+                currentUtteranceResolverRef.current();
+                currentUtteranceResolverRef.current = null;
+            }
+            currentUtteranceRef.current = null;
+        }
     };
 
     const handleSkip = () => {
         console.log("⏭️ [SKIP] User requested skip.");
-        // Stop current audio immediately
+        // Increment request ID to invalidate current playSlide call
+        playSlideRequestId.current++;
+        
+        // Stop current audio immediately (this now resolves promises)
         stopHumeAudio();
-        if (speechSynth) speechSynth.cancel();
+        
+        // Cancel browser TTS and resolve its promise
+        if (speechSynth) {
+            speechSynth.cancel();
+            if (currentUtteranceResolverRef.current) {
+                console.log("🔊 [SKIP] Resolving browser TTS promise on skip");
+                currentUtteranceResolverRef.current();
+                currentUtteranceResolverRef.current = null;
+            }
+            currentUtteranceRef.current = null;
+        }
 
         // Calculate next slide
         const nextIndex = currentSlide + 1;
         if (nextIndex < SCRIPT.length) {
-            // We need to forcefully break the previous 'await' chain.
-            // Since we can't easily cancel a Promise, the best way in this simple setup is 
-            // to rely on the fact that 'stopHumeAudio' kills the sound.
-            // However, the previous 'playSlide' is still awaiting 'speak'.
-            // The 'speak' function awaits 'playHumeAudio'.
-            // If 'playHumeAudio' relies on 'onended', stopping the audio *should* trigger 'onended' or proper cleanup?
-            // Actually, HTMLAudioElement.pause() does NOT fire 'onended'.
-            // So we might have a race condition where the previous 'playSlide' is stuck or finishes later.
-
-            // For a robust "Skip", we should probably set a "skipping" ref or rely on the fact that
-            // calling 'playSlide' again will overwrite 'currentSlide'.
-            // But 'playSlide' is recursive.
-
-            // SIMPLIFICATION: 
-            // The previous 'playSlide' loop will continue unless we stop it. 
-            // But we don't have a cancellation token. 
-            // In this specific architecture, a clean "Interrupt" is tricky without refactoring 'speak' to be cancellable.
-
-            // RE-STRATEGY for Skip:
-            // Just kill audio. The 'speak' promise will effectively hang or finish silently.
-            // We force-call playSlide(nextIndex).
-            // We might get double calls if the previous one finishes.
-            // Fix: Add a generic 'slideId' ref to ignore stale callbacks?
-
-            // Let's rely on the user's request for now: "click through... autoplays next".
+            // Start new slide with new request ID
+            // The old playSlide call will be ignored due to request ID mismatch
             playSlide(nextIndex);
         } else {
             stop();
@@ -343,8 +400,17 @@ export default function Presentation() {
             } else if (e.key === 'ArrowLeft' && isPlayingRef.current && currentSlideRef.current > 0) {
                 // Left arrow to go back (if possible)
                 const prevIndex = currentSlideRef.current - 1;
+                // Increment request ID to invalidate current call
+                playSlideRequestId.current++;
                 stopHumeAudio();
-                if (speechSynth) speechSynth.cancel();
+                if (speechSynth) {
+                    speechSynth.cancel();
+                    if (currentUtteranceResolverRef.current) {
+                        currentUtteranceResolverRef.current();
+                        currentUtteranceResolverRef.current = null;
+                    }
+                    currentUtteranceRef.current = null;
+                }
                 playSlide(prevIndex);
             } else if (e.key === ' ' && isPlayingRef.current) {
                 // Spacebar to pause

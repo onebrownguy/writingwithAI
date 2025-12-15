@@ -4,13 +4,29 @@ const HUME_API_KEY = import.meta.env.VITE_HUME_API_KEY;
 const HUME_VOICE_ID = import.meta.env.VITE_HUME_VOICE_ID || "b04e243e-13f2-400e-8f71-af8c884cb372";
 
 let currentAudio: HTMLAudioElement | null = null;
+let currentAudioUrl: string | null = null; // Track blob URL for cleanup
+let currentAudioPromise: { resolve: (value: boolean) => void } | null = null; // Track promise resolver
 
 export const stopHumeAudio = () => {
     if (currentAudio) {
         console.log("🎙️ [HUME] Stopping current audio.");
         currentAudio.pause();
+        
+        // Revoke blob URL to prevent memory leaks
+        if (currentAudioUrl) {
+            URL.revokeObjectURL(currentAudioUrl);
+            currentAudioUrl = null;
+        }
+        
         currentAudio.src = ""; // Release memory
         currentAudio = null;
+        
+        // Resolve the promise immediately so playSlide doesn't wait for timeout
+        if (currentAudioPromise) {
+            console.log("🎙️ [HUME] Resolving promise on stop");
+            currentAudioPromise.resolve(false);
+            currentAudioPromise = null;
+        }
     }
 };
 
@@ -108,31 +124,72 @@ export const playHumeAudio = async (text: string, emotion?: string): Promise<boo
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         currentAudio = audio; // Track for global stopping
+        currentAudioUrl = audioUrl; // Track URL for cleanup
 
         return new Promise((resolve) => {
+            // Store resolver so stopHumeAudio can resolve it
+            currentAudioPromise = { resolve };
+            
             let audioStarted = false;
+            let resolved = false; // Prevent double resolution
+            
+            const safeResolve = (value: boolean) => {
+                if (!resolved) {
+                    resolved = true;
+                    currentAudioPromise = null; // Clear reference
+                    resolve(value);
+                }
+            };
             
             audio.onended = () => {
                 console.log("🎙️ [HUME] ✅ Audio finished playing!");
-                resolve(true); // Audio finished playing
+                // Clean up blob URL on natural completion
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                    currentAudioUrl = null;
+                }
+                currentAudio = null;
+                safeResolve(true); // Audio finished playing
             };
             audio.onerror = (e) => {
                 console.error("🎙️ [HUME] ❌ Audio playback error:", e);
-                resolve(false); // Audio failed
+                // Clean up on error
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                    currentAudioUrl = null;
+                }
+                currentAudio = null;
+                safeResolve(false); // Audio failed
             };
             audio.play().then(() => {
                 console.log("🎙️ [HUME] ▶️ Audio started playing...");
                 audioStarted = true;
             }).catch((err) => {
                 console.error("🎙️ [HUME] ❌ Play blocked:", err);
-                resolve(false);
+                // Clean up on play failure
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                    currentAudioUrl = null;
+                }
+                currentAudio = null;
+                safeResolve(false);
             });
             
             // Safety timeout: if audio doesn't start within 5 seconds, resolve as failed
             setTimeout(() => {
-                if (!audioStarted) {
+                if (!audioStarted && !resolved) {
                     console.warn("🎙️ [HUME] ⚠️ Audio did not start within timeout");
-                    resolve(false);
+                    // Clean up on timeout
+                    if (currentAudioUrl) {
+                        URL.revokeObjectURL(currentAudioUrl);
+                        currentAudioUrl = null;
+                    }
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.src = "";
+                        currentAudio = null;
+                    }
+                    safeResolve(false);
                 }
             }, 5000);
         });
