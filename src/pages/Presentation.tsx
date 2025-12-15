@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { playHumeAudio, stopHumeAudio } from '../utils/hume';
 
 const SCRIPT = [
@@ -112,6 +112,17 @@ export default function Presentation() {
     const [speechSynth, setSpeechSynth] = useState<SpeechSynthesis | null>(null);
     const navigate = useNavigate();
     const mounted = useRef(true);
+    const currentSlideRef = useRef(0);
+    const isPlayingRef = useRef(false);
+
+    // Keep refs in sync with state
+    useEffect(() => {
+        currentSlideRef.current = currentSlide;
+    }, [currentSlide]);
+
+    useEffect(() => {
+        isPlayingRef.current = isPlaying;
+    }, [isPlaying]);
 
     useEffect(() => {
         setSpeechSynth(window.speechSynthesis);
@@ -237,6 +248,33 @@ export default function Presentation() {
         }
     };
 
+    // Keyboard navigation
+    useEffect(() => {
+        const handleKeyPress = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                // ESC key to exit
+                stop();
+                navigate('/');
+            } else if (e.key === 'ArrowRight' && isPlayingRef.current) {
+                // Right arrow to skip forward
+                handleSkip();
+            } else if (e.key === 'ArrowLeft' && isPlayingRef.current && currentSlideRef.current > 0) {
+                // Left arrow to go back (if possible)
+                const prevIndex = currentSlideRef.current - 1;
+                stopHumeAudio();
+                if (speechSynth) speechSynth.cancel();
+                playSlide(prevIndex);
+            } else if (e.key === ' ' && isPlayingRef.current) {
+                // Spacebar to pause
+                e.preventDefault();
+                stop();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [navigate, speechSynth]);
+
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
@@ -312,9 +350,34 @@ export default function Presentation() {
                         ))}
                     </div>
 
-                    <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', gap: '2rem', zIndex: 20 }}>
-                        <button onClick={stop} style={{ background: 'rgba(255,255,255,0.1)' }}><Pause /></button>
-                        <button onClick={() => navigate('/')} style={{ background: 'rgba(255, 0, 80, 0.2)', color: '#ff0050' }}>Exit</button>
+                    {/* Bottom Controls */}
+                    <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', gap: '1rem', zIndex: 20, alignItems: 'center' }}>
+                        <button 
+                            onClick={stop} 
+                            style={{ 
+                                background: 'rgba(255,255,255,0.1)', 
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                color: 'white',
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: '0.5rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                            }}
+                        >
+                            <Pause size={18} /> Pause
+                        </button>
+                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', padding: '0 1rem' }}>
+                            Click slide to skip • ← → to navigate • ESC to exit
+                        </div>
                     </div>
 
                     {/* Progress Bar */}
@@ -327,10 +390,109 @@ export default function Presentation() {
                         />
                     </div>
 
-                    {/* Slide Counter */}
-                    <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 20, color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
-                        {currentSlide + 1} / {SCRIPT.length}
+                    {/* Top Navigation Bar */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 2rem', zIndex: 20 }}>
+                        {/* Slide Counter */}
+                        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span>{currentSlide + 1} / {SCRIPT.length}</span>
+                        </div>
+
+                        {/* Close Button */}
+                        <button 
+                            onClick={() => {
+                                stop();
+                                navigate('/');
+                            }}
+                            style={{ 
+                                background: 'rgba(255, 0, 80, 0.2)', 
+                                border: '1px solid rgba(255, 0, 80, 0.3)',
+                                color: '#ff0050', 
+                                padding: '0.5rem 1rem',
+                                borderRadius: '0.5rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '0.9rem',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 0, 80, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 0, 80, 0.2)';
+                            }}
+                        >
+                            <X size={18} /> Exit (ESC)
+                        </button>
                     </div>
+
+                    {/* Navigation Arrows */}
+                    {currentSlide > 0 && (
+                        <button
+                            onClick={() => {
+                                stopHumeAudio();
+                                if (speechSynth) speechSynth.cancel();
+                                playSlide(currentSlide - 1);
+                            }}
+                            style={{
+                                position: 'absolute',
+                                left: '2rem',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'rgba(255,255,255,0.1)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                color: 'white',
+                                padding: '1rem',
+                                borderRadius: '50%',
+                                cursor: 'pointer',
+                                zIndex: 20,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                            }}
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+                    )}
+
+                    {currentSlide < SCRIPT.length - 1 && (
+                        <button
+                            onClick={handleSkip}
+                            style={{
+                                position: 'absolute',
+                                right: '2rem',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'rgba(255,255,255,0.1)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                color: 'white',
+                                padding: '1rem',
+                                borderRadius: '50%',
+                                cursor: 'pointer',
+                                zIndex: 20,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                            }}
+                        >
+                            <ChevronRight size={24} />
+                        </button>
+                    )}
                 </>
             )}
         </div>
