@@ -48,7 +48,7 @@ export default function Horizon() {
                         <h3 style={{ color: 'white' }}>2. Strategic Empathy</h3>
                         <p style={{ color: 'var(--text-pink)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>Human Skill</p>
                         <p style={{ color: 'var(--text-secondary)' }}>
-                            AI can solve logic puzzles, but it doesn't understand <em>pain</em>. Toucan Transit succeeded not because the code was perfect, but because I understood the anxiety of a student missing a bus. Only a human can define the "why".
+                            AI can solve logic puzzles, but it doesn't understand <em>pain</em>. Toucan Transit succeeded not because the code was perfect, but because I understood the anxiety of a student missing a bus. Only a human can define the "why". As <a href="https://www.psychologytoday.com/us/blog/the-digital-self/202504/ai-beat-the-turing-test-by-being-a-better-human" target="_blank" rel="noopener noreferrer" style={{ color: '#ff0050', textDecoration: 'underline' }}>research shows</a>, AI may pass the Turing test, but it's our humanity—our ability to understand context, emotion, and consequence—that remains irreplaceable.
                         </p>
                     </div>
 
@@ -65,6 +65,9 @@ export default function Horizon() {
                     <h2 style={{ marginBottom: '1.5rem' }}>Reading the Future</h2>
                     <p style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
                         The readings this semester have shaped my understanding of what's coming. From <a href="https://www.searchengine.show/should-we-be-worried-about-openai/" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>critical examinations of OpenAI's trajectory</a> to <a href="https://sobrief.com/books/user-friendly" target="_blank" rel="noopener noreferrer" style={{ color: '#7600ff', textDecoration: 'underline' }}>discussions of user-friendly design</a>, I've learned that the future isn't predetermined. We're building it, one decision at a time. The question isn't whether AI will transform our world—it's whether we'll shape that transformation with intention, or let it shape us.
+                    </p>
+                    <p style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'var(--text-secondary)', marginTop: '1.5rem' }}>
+                        The <a href="https://www.newyorker.com/magazine/2025/09/15/playing-the-field-with-my-ai-boyfriends" target="_blank" rel="noopener noreferrer" style={{ color: '#ff0050', textDecoration: 'underline' }}>New Yorker's exploration of AI relationships</a> and <a href="https://www.bbc.com/future/article/20241018-ai-art-the-end-of-creativity-or-a-new-movement" target="_blank" rel="noopener noreferrer" style={{ color: '#eab308', textDecoration: 'underline' }}>BBC's analysis of AI art</a> reveal that we're not just building tools—we're redefining what it means to create, connect, and be human. The <a href="https://www.science.org/doi/10.1126/sciadv.adn5290" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>Science study showing AI beating the test</a> isn't a victory for machines; it's a call to action for humans to define what we value beyond what can be measured.
                     </p>
                 </div>
             </motion.div>

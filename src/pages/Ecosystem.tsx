@@ -209,7 +209,7 @@ export default function Ecosystem() {
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>Tim Urban • A deep dive into exponential growth and AI futures.</div>
                             </li>
 
-                            <li style={{ marginBottom: '0' }}>
+                            <li style={{ marginBottom: '1.5rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                                     <Globe size={18} color="#00f2ea" />
                                     <a href="https://hai.stanford.edu/research/ai-index-report" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
@@ -217,6 +217,26 @@ export default function Ecosystem() {
                                     </a>
                                 </div>
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>Stanford HAI • Key data on AI education and global trends.</div>
+                            </li>
+
+                            <li style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                    <Globe size={18} color="#7600ff" />
+                                    <a href="https://web.archive.org/web/20250727182038/https:/www.nytimes.com/2025/07/18/opinion/ai-chatgpt-school.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
+                                        AI in Schools: The New Reality
+                                    </a>
+                                </div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>NY Times Archive • The evolving role of AI in education.</div>
+                            </li>
+
+                            <li style={{ marginBottom: '0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                    <Globe size={18} color="#eab308" />
+                                    <a href="https://www.psychologytoday.com/us/blog/the-digital-self/202504/ai-beat-the-turing-test-by-being-a-better-human" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
+                                        AI Beat the Turing Test by Being a Better Human
+                                    </a>
+                                </div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>Psychology Today • What passing the Turing test really means for humanity.</div>
                             </li>
                         </ul>
                     </div>

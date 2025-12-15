@@ -30,7 +30,7 @@ export default function CompassPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <h1 style={{ marginBottom: '1rem' }}>The <span className="text-gradient">Compass</span></h1>
                 <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '4rem' }}>
-                    My Personal AI Literacy Framework. These principles guide every interaction I have with machine intelligence.
+                    My Personal AI Literacy Framework. These principles guide every interaction I have with machine intelligence. Informed by frameworks from <a href="https://digitalpromise.org/initiative/artificial-intelligence-in-education/ai-literacy/" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>Digital Promise</a> and the <a href="https://www.digitaleducationcouncil.com/post/digital-education-council-ai-literacy-framework" target="_blank" rel="noopener noreferrer" style={{ color: '#7600ff', textDecoration: 'underline' }}>Digital Education Council</a>, but shaped by my own experience building with AI.
                 </p>
 
                 <div className="grid-3">
