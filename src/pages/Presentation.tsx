@@ -160,20 +160,22 @@ export default function Presentation() {
         const slide = SCRIPT[index];
         console.log("📽️ [SLIDE] Title:", slide.title);
 
-        // This 'speak' function now returns a Promise that resolves when audio finishes
-        await speak(slide.text, slide.emotion);
-        console.log("📽️ [SLIDE] Speech completed for slide:", index);
-        console.log("📽️ [SLIDE] mounted.current =", mounted.current);
+        // Start speaking immediately (don't wait for animation to complete)
+        // This makes the voice start much sooner, especially on slide 1
+        speak(slide.text, slide.emotion).then(() => {
+            console.log("📽️ [SLIDE] Speech completed for slide:", index);
+            console.log("📽️ [SLIDE] mounted.current =", mounted.current);
 
-        // Advance to next slide
-        const nextIndex = index + 1;
-        console.log("📽️ [SLIDE] Advancing to slide:", nextIndex, "in 200ms...");
+            // Advance to next slide
+            const nextIndex = index + 1;
+            console.log("📽️ [SLIDE] Advancing to slide:", nextIndex, "in 200ms...");
 
-        // Small pause for pacing, then advance
-        setTimeout(() => {
-            console.log("📽️ [SLIDE] Timer fired, calling playSlide(" + nextIndex + ")");
-            playSlide(nextIndex);
-        }, 200); // Reduced pause from 500ms to 200ms
+            // Small pause for pacing, then advance
+            setTimeout(() => {
+                console.log("📽️ [SLIDE] Timer fired, calling playSlide(" + nextIndex + ")");
+                playSlide(nextIndex);
+            }, 200); // Reduced pause from 500ms to 200ms
+        });
     };
 
     const stop = () => {
@@ -253,7 +255,7 @@ export default function Presentation() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.1 }}
-                        transition={{ duration: 0.8 }}
+                        transition={{ duration: 0.4 }}
                         onClick={handleSkip} // CLICK TO SKIP
                         style={{ textAlign: 'center', zIndex: 10, maxWidth: '1000px', padding: '2rem', cursor: 'pointer' }}
                     >

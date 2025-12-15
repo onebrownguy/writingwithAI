@@ -116,10 +116,10 @@ export default function Rearview() {
 
                     <div className="glass-panel">
                         <p style={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
-                            In the "Algorithmic People Pleaser" unit, we learned AI tends to guess what we want. For <strong>TrashBot</strong>, this was a risk. If a user holds up a confusing item, the AI might just guess "Recycling" to make them happy.
+                            In the "Algorithmic People Pleaser" unit, we learned AI tends to guess what we want. As <a href="https://www.article19.org/resources/algorithmic-people-pleasers-are-ai-chatbots-telling-you-what-you-want-to-hear/" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>Article 19's research</a> reveals, AI chatbots are designed to prioritize user satisfaction over truth—they'll tell you what you want to hear. For <strong>TrashBot</strong>, this was a critical risk. If a user holds up a confusing item, the AI might just guess "Recycling" to make them happy.
                         </p>
                         <p style={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
-                            I had to explicitly program a "Brain Layer" that prioritized <strong>uncertainty over confidence</strong>. If the confidence was below 85%, the bot was instructed to ask for help rather than guess. This was a direct application of the "Human in the Loop" ethical framework.
+                            I had to explicitly program a "Brain Layer" that prioritized <strong>uncertainty over confidence</strong>. If the confidence was below 85%, the bot was instructed to ask for help rather than guess. This was a direct application of the "Human in the Loop" ethical framework—recognizing that sometimes the most responsible AI response is to admit it doesn't know.
                         </p>
                     </div>
                 </section>

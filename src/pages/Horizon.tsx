@@ -18,7 +18,7 @@ export default function Horizon() {
                         </div>
                         <h3 style={{ color: 'white', fontSize: '2rem', marginBottom: '1rem' }}>The Super-Individual</h3>
                         <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                            We are entering an era where a single developer can build systems that used to require a 10-person startup. Toucan Transit (production-grade, multi-agent) was built by one student. My opportunity is to become a "full-stack founder"—executing large-scale visions with AI leverage.
+                            We are entering an era where a single developer can build systems that used to require a 10-person startup. Toucan Transit (production-grade, multi-agent) was built by one student. My opportunity is to become a "full-stack founder"—executing large-scale visions with AI leverage. As <a href="https://blog.samaltman.com/the-gentle-singularity" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>Sam Altman describes</a>, we're moving toward a "gentle singularity" where AI amplifies human capability rather than replacing it—if we maintain our agency.
                         </p>
                     </div>
 
@@ -29,7 +29,7 @@ export default function Horizon() {
                         </div>
                         <h3 style={{ color: 'white', fontSize: '2rem', marginBottom: '1rem' }}>Skill Atrophy</h3>
                         <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                            If I rely on AI for everything, I risk losing the fundamental understanding required to debug it. The "Junior Developer" role is disappearing; if I don't maintain deep technical roots, I will become a "prompt operator" instead of an engineer.
+                            If I rely on AI for everything, I risk losing the fundamental understanding required to debug it. The "Junior Developer" role is disappearing; if I don't maintain deep technical roots, I will become a "prompt operator" instead of an engineer. The <a href="https://www.ibm.com/think/topics/history-of-artificial-intelligence" target="_blank" rel="noopener noreferrer" style={{ color: '#ff0050', textDecoration: 'underline' }}>history of AI</a> shows cycles of hype and disillusionment—those who survive are the ones who understand the fundamentals, not just the latest interface.
                         </p>
                     </div>
                 </div>
@@ -56,9 +56,16 @@ export default function Horizon() {
                         <h3 style={{ color: 'white' }}>Next Quest</h3>
                         <p style={{ color: '#eab308', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>Learning Goal</p>
                         <p style={{ color: 'var(--text-secondary)' }}>
-                            Mastering <strong>Local LLM Fine-tuning</strong>. I need to understand how to shape the "brain" itself, not just whisper in its ear.
+                            Mastering <strong>Local LLM Fine-tuning</strong>. I need to understand how to shape the "brain" itself, not just whisper in its ear. But I also need to understand the human cost—the <a href="https://time.com/6247678/openai-chatgpt-kenya-workers/" target="_blank" rel="noopener noreferrer" style={{ color: '#eab308', textDecoration: 'underline' }}>Time investigation into OpenAI's Kenyan workers</a> reminds me that every AI breakthrough has a human story behind it. True literacy means understanding both the code and the context.
                         </p>
                     </div>
+                </div>
+
+                <div className="glass-panel" style={{ marginTop: '4rem', background: 'linear-gradient(45deg, rgba(118,0,255,0.1), rgba(0,242,234,0.1))' }}>
+                    <h2 style={{ marginBottom: '1.5rem' }}>Reading the Future</h2>
+                    <p style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
+                        The readings this semester have shaped my understanding of what's coming. From <a href="https://www.searchengine.show/should-we-be-worried-about-openai/" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>critical examinations of OpenAI's trajectory</a> to <a href="https://sobrief.com/books/user-friendly" target="_blank" rel="noopener noreferrer" style={{ color: '#7600ff', textDecoration: 'underline' }}>discussions of user-friendly design</a>, I've learned that the future isn't predetermined. We're building it, one decision at a time. The question isn't whether AI will transform our world—it's whether we'll shape that transformation with intention, or let it shape us.
+                    </p>
                 </div>
             </motion.div>
         </div>

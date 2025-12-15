@@ -16,7 +16,7 @@ export default function CompassPage() {
         {
             icon: <Layers size={40} color="#eab308" />,
             title: "3. Technical Foundation",
-            desc: "Know the tool to not be fooled by it. AI chatbots are 'people pleasers'—they prioritize satisfaction over truth. Understanding this design flaw allows us to filter out 'greedy' tools and inspect confident hallucinations."
+            desc: "Know the tool to not be fooled by it. AI chatbots are 'people pleasers'—they prioritize satisfaction over truth, as documented by Article 19's research on algorithmic people pleasers. Understanding this design flaw allows us to filter out 'greedy' tools and inspect confident hallucinations."
         },
         {
             icon: <Globe size={40} color="#7600ff" />,
