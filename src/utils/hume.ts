@@ -1,7 +1,7 @@
 // src/utils/hume.ts
 
-const HUME_API_KEY = "elSCkQlsXEFw0VE8W8YD84Ts16o60b8KpS5q7iWKuFGYlPtr";
-const HUME_VOICE_ID = "b04e243e-13f2-400e-8f71-af8c884cb372";
+const HUME_API_KEY = import.meta.env.VITE_HUME_API_KEY;
+const HUME_VOICE_ID = import.meta.env.VITE_HUME_VOICE_ID || "b04e243e-13f2-400e-8f71-af8c884cb372";
 
 let currentAudio: HTMLAudioElement | null = null;
 
