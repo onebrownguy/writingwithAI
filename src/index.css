@@ -1,0 +1,89 @@
+:root {
+  --bg-dark: #09090b;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --accent-cyan: #00f2ea;
+  --accent-pink: #ff0050;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(118, 0, 255, 0.15), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(0, 242, 234, 0.15), transparent 25%);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 242, 234, 0.1);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--accent-cyan), var(--accent-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1, h2, h3 {
+  line-height: 1.2;
+}
+
+h1 { font-size: 3.5rem; letter-spacing: -0.02em; }
+h2 { font-size: 2rem; margin-bottom: 2rem; }
+h3 { font-size: 1.5rem; color: var(--accent-cyan); }
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+button {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
