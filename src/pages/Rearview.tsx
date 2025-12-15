@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Bus, Recycle, Cpu, AlertTriangle, Archive, Image, Globe, Play } from 'lucide-react';
+import { Bus, Recycle, AlertTriangle, Archive, Image, Globe, Play } from 'lucide-react';
 
 export default function Rearview() {
     return (

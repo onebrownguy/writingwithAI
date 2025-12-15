@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Globe, Zap, Download, Layers, Users, BookOpen } from 'lucide-react';
+import { Globe, Zap, BookOpen, Building } from 'lucide-react';
 
 export default function Ecosystem() {
     return (

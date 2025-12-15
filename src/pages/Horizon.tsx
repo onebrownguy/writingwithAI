@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Rocket, TrendingUp, AlertOctagon } from 'lucide-react';
+import { TrendingUp, AlertOctagon } from 'lucide-react';
 
 export default function Horizon() {
     return (
