@@ -114,6 +114,7 @@ export default function Presentation() {
     const mounted = useRef(true);
     const currentSlideRef = useRef(0);
     const isPlayingRef = useRef(false);
+    const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -126,6 +127,28 @@ export default function Presentation() {
 
     useEffect(() => {
         setSpeechSynth(window.speechSynthesis);
+        
+        // Select and cache the voice once when component mounts
+        const selectVoice = () => {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0 && !selectedVoiceRef.current) {
+                // Prefer Google US English, then any US English, then any English
+                const preferredVoice = voices.find(v => v.name.includes('Google US English')) 
+                    || voices.find(v => v.name.includes('US English') && v.lang.startsWith('en-US'))
+                    || voices.find(v => v.lang.startsWith('en-US'))
+                    || voices.find(v => v.lang.startsWith('en'));
+                
+                if (preferredVoice) {
+                    selectedVoiceRef.current = preferredVoice;
+                    console.log("🔊 [VOICE] Selected voice:", preferredVoice.name, preferredVoice.lang);
+                }
+            }
+        };
+        
+        // Voices might not be loaded immediately
+        selectVoice();
+        window.speechSynthesis.onvoiceschanged = selectVoice;
+        
         return () => {
             mounted.current = false;
             window.speechSynthesis.cancel();
@@ -155,9 +178,24 @@ export default function Presentation() {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.9; // Slightly slower for clarity
             utterance.pitch = 1.0;
-            const voices = speechSynth.getVoices();
-            const preferredVoice = voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang.startsWith('en'));
-            if (preferredVoice) utterance.voice = preferredVoice;
+            
+            // Use the cached voice selection to ensure consistency
+            if (selectedVoiceRef.current) {
+                utterance.voice = selectedVoiceRef.current;
+                console.log("🔊 [SPEAK] Using cached voice:", selectedVoiceRef.current.name);
+            } else {
+                // Fallback: try to select voice now if not cached
+                const voices = speechSynth.getVoices();
+                const preferredVoice = voices.find(v => v.name.includes('Google US English')) 
+                    || voices.find(v => v.name.includes('US English') && v.lang.startsWith('en-US'))
+                    || voices.find(v => v.lang.startsWith('en-US'))
+                    || voices.find(v => v.lang.startsWith('en'));
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                    selectedVoiceRef.current = preferredVoice; // Cache it
+                    console.log("🔊 [SPEAK] Selected voice:", preferredVoice.name);
+                }
+            }
 
             let utteranceStarted = false;
             
