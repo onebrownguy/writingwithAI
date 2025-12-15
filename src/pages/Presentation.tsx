@@ -94,6 +94,15 @@ const SCRIPT = [
         visual: "⚖️",
         emotion: "Professional, heartfelt, inspiring conclusion",
         duration: 0
+    },
+    {
+        id: 11,
+        title: "The Technology Behind This Voice",
+        subtitle: "A Centaur's Tool",
+        text: "This audio essay itself is a demonstration of human-AI collaboration. I recorded my own voice and uploaded it to Hume AI's voice cloning technology. The Hume API then generated this narration, preserving my vocal identity while allowing me to produce this presentation at scale. This is the Centaur model in action: I provided the voice, the words, and the vision. AI provided the technical capability to synthesize and deliver it. Together, we created something neither could achieve alone.",
+        visual: "🎙️",
+        emotion: "Professional, reflective, meta-commentary",
+        duration: 0
     }
 ];
 
@@ -152,7 +161,11 @@ export default function Presentation() {
 
         if (index >= SCRIPT.length) {
             console.log("📽️ [SLIDE] Reached end of presentation!");
-            setIsPlaying(false);
+            // After the final slide, show a brief pause then return to start screen
+            setTimeout(() => {
+                setIsPlaying(false);
+                setCurrentSlide(0);
+            }, 2000);
             return;
         }
 
@@ -237,7 +250,7 @@ export default function Presentation() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', zIndex: 10 }}>
                     <h1 style={{ fontSize: '4rem', marginBottom: '2rem' }} className="text-gradient">Audio Essay Mode</h1>
                     <p style={{ maxWidth: '600px', margin: '0 auto 3rem', color: 'var(--text-secondary)' }}>
-                        This will activate the browser's Text-to-Speech engine to narrate the portfolio strategy.
+                        This presentation uses Hume AI's voice synthesis technology, powered by my own recorded voice.
                         Please ensure your sound is on.
                     </p>
                     <button onClick={startPresentation} style={{ fontSize: '1.25rem', padding: '1rem 3rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -312,6 +325,11 @@ export default function Presentation() {
                             transition={{ duration: 0.5 }}
                             style={{ height: '100%', background: 'linear-gradient(90deg, #00f2ea, #7600ff)' }}
                         />
+                    </div>
+
+                    {/* Slide Counter */}
+                    <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 20, color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                        {currentSlide + 1} / {SCRIPT.length}
                     </div>
                 </>
             )}
