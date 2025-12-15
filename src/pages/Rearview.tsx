@@ -45,7 +45,7 @@ export default function Rearview() {
 
                     <div className="glass-panel">
                         <p style={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
-                            The syllabus introduced the concept of "AI as a Coworker" (Mollick, Week 10), but I truly understood it while building the <strong>Toucan Transit</strong> multi-agent architecture.
+                            The syllabus introduced the concept of "AI as a Coworker" (Mollick, Week 10), but I truly understood it while building the <strong>Toucan Transit</strong> multi-agent architecture. <a href="https://mitsloan.mit.edu/ideas-made-to-matter/when-humans-and-ai-work-best-together-and-when-each-better-alone" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>MIT Sloan research</a> confirms that humans and AI work best together when each does what they do better—AI handles pattern recognition and speed, while humans provide judgment and context.
                         </p>
                         <p style={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
                             <strong>The Challenge:</strong> I wasn't just writing code; I was orchestrating a team. The `StreamingOrchestratorAgent` had to manage the `CoffeeScout` and `RouteAgent` simultaneously. Initially, I treated them as tools—calculators.

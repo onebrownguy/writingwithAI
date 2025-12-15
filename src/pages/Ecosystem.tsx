@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Globe, Zap, BookOpen, Building } from 'lucide-react';
+import { Globe, Zap, BookOpen, Building, Play } from 'lucide-react';
 
 export default function Ecosystem() {
     return (
@@ -61,7 +61,7 @@ export default function Ecosystem() {
                             Innovation doesn't happen in a vacuum. Through the <strong>Gemini Hackathon</strong> and my role as <strong>EDGE Team President</strong>, I've worked to create spaces where students can safely experiment with these "alien minds."
                         </p>
                         <p style={{ lineHeight: 1.8, fontSize: '1.1rem', marginTop: '1rem' }}>
-                            <strong>The Mission:</strong> As a Latino in tech, I see the widening gap. The <strong>Stanford HAI Index Report (Finding #9)</strong> reveals that over 80% of educators want to teach AI, yet less than half feel empowered to do so. My goal is to close this gap—empowering students to install Claude, run Codex, and become the architects of their own future.
+                            <strong>The Mission:</strong> As a Latino in tech, I see the widening gap. The <strong>Stanford HAI Index Report (Finding #9)</strong> reveals that over 80% of educators want to teach AI, yet less than half feel empowered to do so. My goal is to close this gap—empowering students to install Claude, run Codex, and become the architects of their own future. The rise of <a href="https://www.park.edu/blog/ai-in-education-the-rise-of-intelligent-tutoring-systems/" target="_blank" rel="noopener noreferrer" style={{ color: '#ff0050', textDecoration: 'underline' }}>intelligent tutoring systems</a> shows the potential, but as <a href="https://web.archive.org/web/20250727182038/https:/www.nytimes.com/2025/07/18/opinion/ai-chatgpt-school.html" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ea', textDecoration: 'underline' }}>Meghan O'Rourke's powerful essay</a> reveals, we must preserve the human act of attention and care that makes meaning possible.
                         </p>
                         <div style={{ marginTop: '2rem', marginBottom: '3rem' }}>
                             <a href="https://austincc.campuslabs.com/engage/organization/edgeteam" target="_blank" rel="noopener noreferrer">
@@ -229,7 +229,7 @@ export default function Ecosystem() {
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>NY Times Archive • The evolving role of AI in education.</div>
                             </li>
 
-                            <li style={{ marginBottom: '0' }}>
+                            <li style={{ marginBottom: '1.5rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                                     <Globe size={18} color="#eab308" />
                                     <a href="https://www.psychologytoday.com/us/blog/the-digital-self/202504/ai-beat-the-turing-test-by-being-a-better-human" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
@@ -237,6 +237,36 @@ export default function Ecosystem() {
                                     </a>
                                 </div>
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>Psychology Today • What passing the Turing test really means for humanity.</div>
+                            </li>
+
+                            <li style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                    <Play size={18} color="#7600ff" />
+                                    <a href="https://www.youtube.com/watch?v=MV8SEoHDCUs" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
+                                        Understanding LLMs: A Deep Dive
+                                    </a>
+                                </div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>YouTube • Technical exploration of large language models.</div>
+                            </li>
+
+                            <li style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                    <Globe size={18} color="#00f2ea" />
+                                    <a href="https://www.brainonllm.com/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
+                                        Brain on LLM
+                                    </a>
+                                </div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>Research & insights on how LLMs work and their implications.</div>
+                            </li>
+
+                            <li style={{ marginBottom: '0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                    <Globe size={18} color="#ff0050" />
+                                    <a href="https://www.weforum.org/stories/2025/01/elevating-uniquely-human-skills-in-the-age-of-ai/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
+                                        Elevating Uniquely Human Skills in the Age of AI
+                                    </a>
+                                </div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '1.6rem' }}>World Economic Forum • The skills that will define human value in an AI-driven world.</div>
                             </li>
                         </ul>
                     </div>
