@@ -139,26 +139,53 @@ export default function Presentation() {
         const humeSuccess = await playHumeAudio(text, emotion);
         console.log("🔊 [SPEAK] Hume result:", humeSuccess);
         if (humeSuccess) {
-            console.log("🔊 [SPEAK] Hume succeeded, returning...");
-            return; // playHumeAudio resolves only when audio ENDS
+            console.log("🔊 [SPEAK] Hume succeeded, audio finished playing");
+            return; // playHumeAudio resolves only when audio ENDS (via onended event)
         }
 
         console.log("🔊 [SPEAK] Hume failed, falling back to Browser TTS...");
         // 2. Fallback to Browser TTS (wrapped in Promise)
         return new Promise((resolve) => {
-            if (!speechSynth) { resolve(); return; }
+            if (!speechSynth) { 
+                console.warn("🔊 [SPEAK] No speech synthesis available");
+                resolve(); 
+                return; 
+            }
             speechSynth.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.0;
+            utterance.rate = 0.9; // Slightly slower for clarity
             utterance.pitch = 1.0;
             const voices = speechSynth.getVoices();
             const preferredVoice = voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang.startsWith('en'));
             if (preferredVoice) utterance.voice = preferredVoice;
 
-            utterance.onend = () => resolve();
-            utterance.onerror = () => resolve();
+            let utteranceStarted = false;
+            
+            utterance.onstart = () => {
+                console.log("🔊 [SPEAK] Browser TTS started");
+                utteranceStarted = true;
+            };
+            
+            utterance.onend = () => {
+                console.log("🔊 [SPEAK] Browser TTS finished");
+                resolve();
+            };
+            
+            utterance.onerror = (e) => {
+                console.error("🔊 [SPEAK] Browser TTS error:", e);
+                // Still resolve so presentation can continue
+                resolve();
+            };
 
             speechSynth.speak(utterance);
+            
+            // Safety timeout: if TTS doesn't start within 3 seconds, resolve anyway
+            setTimeout(() => {
+                if (!utteranceStarted) {
+                    console.warn("🔊 [SPEAK] Browser TTS did not start within timeout");
+                    resolve();
+                }
+            }, 3000);
         });
     };
 
@@ -184,22 +211,39 @@ export default function Presentation() {
         const slide = SCRIPT[index];
         console.log("📽️ [SLIDE] Title:", slide.title);
 
-        // Start speaking immediately (don't wait for animation to complete)
-        // This makes the voice start much sooner, especially on slide 1
-        speak(slide.text, slide.emotion).then(() => {
+        // Wait for audio to complete before advancing
+        // This ensures each slide plays fully before moving to the next
+        try {
+            await speak(slide.text, slide.emotion);
             console.log("📽️ [SLIDE] Speech completed for slide:", index);
             console.log("📽️ [SLIDE] mounted.current =", mounted.current);
 
-            // Advance to next slide
-            const nextIndex = index + 1;
-            console.log("📽️ [SLIDE] Advancing to slide:", nextIndex, "in 200ms...");
+            // Check if we're still mounted and playing before advancing
+            if (!mounted.current || !isPlayingRef.current) {
+                console.log("📽️ [SLIDE] Presentation stopped, not advancing");
+                return;
+            }
 
-            // Small pause for pacing, then advance
-            setTimeout(() => {
+            // Small pause for pacing, then advance to next slide
+            const nextIndex = index + 1;
+            console.log("📽️ [SLIDE] Advancing to slide:", nextIndex, "in 500ms...");
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Double-check we should still advance
+            if (mounted.current && isPlayingRef.current) {
                 console.log("📽️ [SLIDE] Timer fired, calling playSlide(" + nextIndex + ")");
                 playSlide(nextIndex);
-            }, 200); // Reduced pause from 500ms to 200ms
-        });
+            }
+        } catch (error) {
+            console.error("📽️ [SLIDE] Error during speech:", error);
+            // On error, still advance after a delay
+            setTimeout(() => {
+                if (mounted.current && isPlayingRef.current) {
+                    playSlide(index + 1);
+                }
+            }, 1000);
+        }
     };
 
     const stop = () => {

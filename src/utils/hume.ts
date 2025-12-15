@@ -110,6 +110,8 @@ export const playHumeAudio = async (text: string, emotion?: string): Promise<boo
         currentAudio = audio; // Track for global stopping
 
         return new Promise((resolve) => {
+            let audioStarted = false;
+            
             audio.onended = () => {
                 console.log("🎙️ [HUME] ✅ Audio finished playing!");
                 resolve(true); // Audio finished playing
@@ -120,10 +122,19 @@ export const playHumeAudio = async (text: string, emotion?: string): Promise<boo
             };
             audio.play().then(() => {
                 console.log("🎙️ [HUME] ▶️ Audio started playing...");
+                audioStarted = true;
             }).catch((err) => {
                 console.error("🎙️ [HUME] ❌ Play blocked:", err);
                 resolve(false);
             });
+            
+            // Safety timeout: if audio doesn't start within 5 seconds, resolve as failed
+            setTimeout(() => {
+                if (!audioStarted) {
+                    console.warn("🎙️ [HUME] ⚠️ Audio did not start within timeout");
+                    resolve(false);
+                }
+            }, 5000);
         });
 
     } catch (error) {
