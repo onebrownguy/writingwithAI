@@ -65,7 +65,7 @@ export default function Rearview() {
                                 <a href="https://gaustincc-my.sharepoint.com/:p:/g/personal/abel_rincon_g_austincc_edu/IQAob3MINwOVQbaGOwbNcceqAfsjYabjRShWUX5Oevj5h3A?e=iHy4f5" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '0.5rem' }}>
                                     <Globe size={16} color="#00f2ea" /> Presentation Ver. 2
                                 </a>
-                                <a href="http://youtube.com/watch?v=_aRdYs5O_sk" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                                <a href="https://www.youtube.com/watch?v=_aRdYs5O_sk" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '0.5rem' }}>
                                     <Play size={16} color="#ff0050" /> Demo Video 1
                                 </a>
                                 <a href="https://www.youtube.com/watch?v=hZdoD6_Gx2Q&t=118s" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'white', textDecoration: 'none', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '0.5rem' }}>

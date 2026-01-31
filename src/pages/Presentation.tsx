@@ -109,15 +109,13 @@ const SCRIPT = [
 export default function Presentation() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [speechSynth, setSpeechSynth] = useState<SpeechSynthesis | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [speechError, setSpeechError] = useState<string | null>(null);
     const navigate = useNavigate();
     const mounted = useRef(true);
     const currentSlideRef = useRef(0);
     const isPlayingRef = useRef(false);
-    const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
     const playSlideRequestId = useRef(0); // Track request IDs to prevent stale calls
-    const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null); // Track current utterance for cancellation
-    const currentUtteranceResolverRef = useRef<(() => void) | null>(null); // Track resolver to resolve on cancel
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -129,138 +127,27 @@ export default function Presentation() {
     }, [isPlaying]);
 
     useEffect(() => {
-        setSpeechSynth(window.speechSynthesis);
-        
-        // Select and cache the voice once when component mounts
-        const selectVoice = () => {
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length > 0 && !selectedVoiceRef.current) {
-                // Prefer Google US English, then any US English, then any English
-                const preferredVoice = voices.find(v => v.name.includes('Google US English')) 
-                    || voices.find(v => v.name.includes('US English') && v.lang.startsWith('en-US'))
-                    || voices.find(v => v.lang.startsWith('en-US'))
-                    || voices.find(v => v.lang.startsWith('en'));
-                
-                if (preferredVoice) {
-                    selectedVoiceRef.current = preferredVoice;
-                    console.log("🔊 [VOICE] Selected voice:", preferredVoice.name, preferredVoice.lang);
-                }
-            }
-        };
-        
-        // Voices might not be loaded immediately
-        selectVoice();
-        window.speechSynthesis.onvoiceschanged = selectVoice;
-        
         return () => {
             mounted.current = false;
             // Increment request ID to invalidate any pending calls
             playSlideRequestId.current++;
-            window.speechSynthesis.cancel();
             stopHumeAudio();
-            // Resolve any pending browser TTS promise
-            if (currentUtteranceResolverRef.current) {
-                currentUtteranceResolverRef.current();
-                currentUtteranceResolverRef.current = null;
-            }
-            currentUtteranceRef.current = null;
         };
     }, []);
 
     const speak = async (text: string, emotion?: string): Promise<void> => {
-        console.log("🔊 [SPEAK] Starting speech. Text:", text.substring(0, 30) + "...", "Emotion:", emotion);
+        setSpeechError(null);
+        setIsLoading(true);
+        console.log("🔊 [SPEAK] Starting speech with Hume AI. Text:", text.substring(0, 30) + "...", "Emotion:", emotion);
 
-        // 1. Try Hume AI
         const humeSuccess = await playHumeAudio(text, emotion);
+        setIsLoading(false);
         console.log("🔊 [SPEAK] Hume result:", humeSuccess);
-        if (humeSuccess) {
-            console.log("🔊 [SPEAK] Hume succeeded, audio finished playing");
-            return; // playHumeAudio resolves only when audio ENDS (via onended event)
+
+        if (!humeSuccess) {
+            setSpeechError("Voice synthesis unavailable. You can still read the text and navigate slides.");
+            console.warn("🔊 [SPEAK] Hume failed and fallback is disabled.");
         }
-
-        console.log("🔊 [SPEAK] Hume failed, falling back to Browser TTS...");
-        // 2. Fallback to Browser TTS (wrapped in Promise)
-        return new Promise((resolve) => {
-            if (!speechSynth) { 
-                console.warn("🔊 [SPEAK] No speech synthesis available");
-                resolve(); 
-                return; 
-            }
-            
-            // Cancel any previous utterance and resolve its promise
-            if (currentUtteranceRef.current) {
-                speechSynth.cancel();
-                if (currentUtteranceResolverRef.current) {
-                    console.log("🔊 [SPEAK] Resolving previous utterance promise on cancel");
-                    currentUtteranceResolverRef.current();
-                    currentUtteranceResolverRef.current = null;
-                }
-            }
-            
-            speechSynth.cancel(); // Ensure clean state
-            const utterance = new SpeechSynthesisUtterance(text);
-            currentUtteranceRef.current = utterance; // Track for cancellation
-            currentUtteranceResolverRef.current = resolve; // Store resolver
-            
-            utterance.rate = 0.9; // Slightly slower for clarity
-            utterance.pitch = 1.0;
-            
-            // Use the cached voice selection to ensure consistency
-            if (selectedVoiceRef.current) {
-                utterance.voice = selectedVoiceRef.current;
-                console.log("🔊 [SPEAK] Using cached voice:", selectedVoiceRef.current.name);
-            } else {
-                // Fallback: try to select voice now if not cached
-                const voices = speechSynth.getVoices();
-                const preferredVoice = voices.find(v => v.name.includes('Google US English')) 
-                    || voices.find(v => v.name.includes('US English') && v.lang.startsWith('en-US'))
-                    || voices.find(v => v.lang.startsWith('en-US'))
-                    || voices.find(v => v.lang.startsWith('en'));
-                if (preferredVoice) {
-                    utterance.voice = preferredVoice;
-                    selectedVoiceRef.current = preferredVoice; // Cache it
-                    console.log("🔊 [SPEAK] Selected voice:", preferredVoice.name);
-                }
-            }
-
-            let utteranceStarted = false;
-            let resolved = false; // Prevent double resolution
-            
-            const safeResolve = () => {
-                if (!resolved) {
-                    resolved = true;
-                    currentUtteranceRef.current = null;
-                    currentUtteranceResolverRef.current = null;
-                    resolve();
-                }
-            };
-            
-            utterance.onstart = () => {
-                console.log("🔊 [SPEAK] Browser TTS started");
-                utteranceStarted = true;
-            };
-            
-            utterance.onend = () => {
-                console.log("🔊 [SPEAK] Browser TTS finished");
-                safeResolve();
-            };
-            
-            utterance.onerror = (e) => {
-                console.error("🔊 [SPEAK] Browser TTS error:", e);
-                // Still resolve so presentation can continue
-                safeResolve();
-            };
-
-            speechSynth.speak(utterance);
-            
-            // Safety timeout: if TTS doesn't start within 3 seconds, resolve anyway
-            setTimeout(() => {
-                if (!utteranceStarted && !resolved) {
-                    console.warn("🔊 [SPEAK] Browser TTS did not start within timeout");
-                    safeResolve();
-                }
-            }, 3000);
-        });
     };
 
     const startPresentation = () => {
@@ -299,13 +186,13 @@ export default function Presentation() {
         // This ensures each slide plays fully before moving to the next
         try {
             await speak(slide.text, slide.emotion);
-            
+
             // Check if this is still the active request (user might have skipped)
             if (requestId !== playSlideRequestId.current) {
                 console.log("📽️ [SLIDE] Request superseded, not advancing");
                 return;
             }
-            
+
             console.log("📽️ [SLIDE] Speech completed for slide:", index);
             console.log("📽️ [SLIDE] mounted.current =", mounted.current);
 
@@ -318,9 +205,9 @@ export default function Presentation() {
             // Small pause for pacing, then advance to next slide
             const nextIndex = index + 1;
             console.log("📽️ [SLIDE] Advancing to slide:", nextIndex, "in 500ms...");
-            
+
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             // Triple-check: request ID, mounted, and playing
             if (requestId === playSlideRequestId.current && mounted.current && isPlayingRef.current) {
                 console.log("📽️ [SLIDE] Timer fired, calling playSlide(" + nextIndex + ")");
@@ -344,47 +231,26 @@ export default function Presentation() {
         // Increment request ID to invalidate any pending playSlide calls
         playSlideRequestId.current++;
         stopHumeAudio(); // Kill Hume audio (this now resolves its promise)
-        
-        // Kill browser TTS and resolve its promise
-        if (speechSynth) {
-            speechSynth.cancel();
-            if (currentUtteranceResolverRef.current) {
-                console.log("🔊 [STOP] Resolving browser TTS promise on stop");
-                currentUtteranceResolverRef.current();
-                currentUtteranceResolverRef.current = null;
-            }
-            currentUtteranceRef.current = null;
-        }
     };
 
     const handleSkip = () => {
         console.log("⏭️ [SKIP] User requested skip.");
-        // Increment request ID to invalidate current playSlide call
         playSlideRequestId.current++;
-        
-        // Stop current audio immediately (this now resolves promises)
         stopHumeAudio();
-        
-        // Cancel browser TTS and resolve its promise
-        if (speechSynth) {
-            speechSynth.cancel();
-            if (currentUtteranceResolverRef.current) {
-                console.log("🔊 [SKIP] Resolving browser TTS promise on skip");
-                currentUtteranceResolverRef.current();
-                currentUtteranceResolverRef.current = null;
-            }
-            currentUtteranceRef.current = null;
-        }
 
-        // Calculate next slide
         const nextIndex = currentSlide + 1;
         if (nextIndex < SCRIPT.length) {
-            // Start new slide with new request ID
-            // The old playSlide call will be ignored due to request ID mismatch
             playSlide(nextIndex);
         } else {
             stop();
         }
+    };
+
+    const handleGoBack = () => {
+        if (currentSlideRef.current <= 0) return;
+        playSlideRequestId.current++;
+        stopHumeAudio();
+        playSlide(currentSlideRef.current - 1);
     };
 
     // Keyboard navigation
@@ -398,20 +264,7 @@ export default function Presentation() {
                 // Right arrow to skip forward
                 handleSkip();
             } else if (e.key === 'ArrowLeft' && isPlayingRef.current && currentSlideRef.current > 0) {
-                // Left arrow to go back (if possible)
-                const prevIndex = currentSlideRef.current - 1;
-                // Increment request ID to invalidate current call
-                playSlideRequestId.current++;
-                stopHumeAudio();
-                if (speechSynth) {
-                    speechSynth.cancel();
-                    if (currentUtteranceResolverRef.current) {
-                        currentUtteranceResolverRef.current();
-                        currentUtteranceResolverRef.current = null;
-                    }
-                    currentUtteranceRef.current = null;
-                }
-                playSlide(prevIndex);
+                handleGoBack();
             } else if (e.key === ' ' && isPlayingRef.current) {
                 // Spacebar to pause
                 e.preventDefault();
@@ -421,7 +274,7 @@ export default function Presentation() {
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [navigate, speechSynth]);
+    }, [navigate]);
 
     return (
         <div style={{
@@ -439,8 +292,8 @@ export default function Presentation() {
                         This presentation uses Hume AI's voice synthesis technology, powered by my own recorded voice.
                         Please ensure your sound is on.
                     </p>
-                    <button onClick={startPresentation} style={{ fontSize: '1.25rem', padding: '1rem 3rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Play fill="white" /> Start Presentation
+                    <button onClick={startPresentation} style={{ fontSize: '1.25rem', padding: '1rem 3rem', display: 'flex', alignItems: 'center', gap: '1rem' }} aria-label="Start audio presentation">
+                        <Play fill="white" aria-hidden /> Start Presentation
                     </button>
                     <br />
                     <button onClick={() => navigate('/')} style={{ background: 'transparent', marginTop: '2rem', color: 'var(--text-secondary)' }}>
@@ -478,32 +331,45 @@ export default function Presentation() {
             {/* Controls & Visuals */}
             {isPlaying && (
                 <>
-                    {/* Audio Visualizer */}
-                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', height: '40px', marginBottom: '2rem', zIndex: 20 }}>
+                    {/* Audio Visualizer - deterministic sine wave */}
+                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', height: '40px', marginBottom: '2rem', zIndex: 20 }} role="presentation">
                         {[...Array(10)].map((_, i) => (
                             <motion.div
                                 key={i}
                                 animate={{
-                                    height: [10, Math.random() * 30 + 10, 10],
-                                    backgroundColor: ['#00f2ea', '#7600ff', '#00f2ea']
+                                    height: [10, 10 + 15 * Math.sin(i * 0.5) + 15, 10],
+                                    backgroundColor: ['var(--accent-cyan)', 'var(--accent-purple)', 'var(--accent-cyan)']
                                 }}
                                 transition={{
-                                    duration: 0.4,
+                                    duration: 0.8,
                                     repeat: Infinity,
                                     repeatType: "reverse",
-                                    delay: i * 0.1
+                                    delay: i * 0.08
                                 }}
-                                style={{ width: '6px', borderRadius: '3px', background: '#00f2ea' }}
+                                style={{ width: '6px', borderRadius: '3px', background: 'var(--accent-cyan)' }}
                             />
                         ))}
                     </div>
 
+                    {/* Loading & error states */}
+                    {isLoading && (
+                        <div style={{ position: 'absolute', top: '4rem', zIndex: 25, fontSize: '0.9rem', color: 'var(--accent-cyan)' }} role="status" aria-live="polite">
+                            Generating audio...
+                        </div>
+                    )}
+                    {speechError && (
+                        <div style={{ position: 'absolute', top: '4rem', zIndex: 25, maxWidth: '400px', padding: '0.75rem 1rem', background: 'rgba(255,0,80,0.2)', border: '1px solid var(--accent-pink)', borderRadius: '0.5rem', fontSize: '0.9rem', color: 'var(--text-primary)' }} role="alert">
+                            {speechError}
+                        </div>
+                    )}
+
                     {/* Bottom Controls */}
                     <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', gap: '1rem', zIndex: 20, alignItems: 'center' }}>
-                        <button 
-                            onClick={stop} 
-                            style={{ 
-                                background: 'rgba(255,255,255,0.1)', 
+                        <button
+                            onClick={stop}
+                            aria-label="Pause presentation"
+                            style={{
+                                background: 'rgba(255,255,255,0.1)',
                                 border: '1px solid rgba(255,255,255,0.2)',
                                 color: 'white',
                                 padding: '0.75rem 1.5rem',
@@ -534,7 +400,7 @@ export default function Presentation() {
                             initial={{ width: 0 }}
                             animate={{ width: `${((currentSlide + 1) / SCRIPT.length) * 100}%` }}
                             transition={{ duration: 0.5 }}
-                            style={{ height: '100%', background: 'linear-gradient(90deg, #00f2ea, #7600ff)' }}
+                            style={{ height: '100%', background: 'linear-gradient(90deg, var(--accent-cyan), var(--accent-purple))' }}
                         />
                     </div>
 
@@ -546,15 +412,13 @@ export default function Presentation() {
                         </div>
 
                         {/* Close Button */}
-                        <button 
-                            onClick={() => {
-                                stop();
-                                navigate('/');
-                            }}
-                            style={{ 
-                                background: 'rgba(255, 0, 80, 0.2)', 
+                        <button
+                            onClick={() => { stop(); navigate('/'); }}
+                            aria-label="Exit presentation (ESC)"
+                            style={{
+                                background: 'rgba(255, 0, 80, 0.2)',
                                 border: '1px solid rgba(255, 0, 80, 0.3)',
-                                color: '#ff0050', 
+                                color: 'var(--accent-pink)',
                                 padding: '0.5rem 1rem',
                                 borderRadius: '0.5rem',
                                 cursor: 'pointer',
@@ -578,11 +442,8 @@ export default function Presentation() {
                     {/* Navigation Arrows */}
                     {currentSlide > 0 && (
                         <button
-                            onClick={() => {
-                                stopHumeAudio();
-                                if (speechSynth) speechSynth.cancel();
-                                playSlide(currentSlide - 1);
-                            }}
+                            onClick={handleGoBack}
+                            aria-label="Previous slide"
                             style={{
                                 position: 'absolute',
                                 left: '2rem',
@@ -614,6 +475,7 @@ export default function Presentation() {
                     {currentSlide < SCRIPT.length - 1 && (
                         <button
                             onClick={handleSkip}
+                            aria-label="Next slide"
                             style={{
                                 position: 'absolute',
                                 right: '2rem',

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Globe, Zap, BookOpen, Building, Play } from 'lucide-react';
+import aiSchematic from '../assets/ai_logic_schematic.png';
 
 export default function Ecosystem() {
     return (
@@ -9,6 +10,35 @@ export default function Ecosystem() {
                 <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '4rem' }}>
                     Moving beyond individual projects to shape institutional strategy and community impact.
                 </p>
+
+                <section style={{ marginBottom: '6rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                        <div style={{ background: 'rgba(0, 242, 234, 0.1)', padding: '1rem', borderRadius: '1rem' }}>
+                            <Globe size={32} color="#00f2ea" />
+                        </div>
+                        <div>
+                            <h2 style={{ margin: 0 }}>System Architecture</h2>
+                            <span style={{ color: '#a1a1aa', fontWeight: 600 }}>The Co-intelligence & Trifecta Framework</span>
+                        </div>
+                    </div>
+
+                    <div className="glass-panel" style={{ textAlign: 'center', background: 'rgba(0,0,0,0.4)' }}>
+                        <img
+                            src={aiSchematic}
+                            alt="Retro-futuristic AI Logic Schematic"
+                            style={{
+                                width: '100%',
+                                maxWidth: '900px',
+                                borderRadius: '0.5rem',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                boxShadow: '0 0 30px rgba(0, 242, 234, 0.15)'
+                            }}
+                        />
+                        <p style={{ marginTop: '2rem', fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '800px', margin: '2rem auto 0' }}>
+                            Visualizing the synergy between <strong>Mollick's 4 Rules of Co-intelligence</strong> and the <strong>Centaur Trifecta</strong> (Understand, Evaluate, Use). This framework ensures human direction remains the "Brain Layer" of all AI deployments.
+                        </p>
+                    </div>
+                </section>
 
                 <section style={{ marginBottom: '6rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
@@ -45,7 +75,8 @@ export default function Ecosystem() {
                     </div>
                 </section>
 
-                <section>
+                <section style={{ marginBottom: '6rem' }}>
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                         <div style={{ background: 'rgba(255, 0, 80, 0.1)', padding: '1rem', borderRadius: '1rem' }}>
                             <Zap size={32} color="#ff0050" />

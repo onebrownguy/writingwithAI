@@ -20,12 +20,6 @@ export default function App() {
                     <Route path="/horizon" element={<Horizon />} />
                     <Route path="/statement" element={<AiStatement />} />
                 </Route>
-                {/* Presentation stays outside layout for full immersion if desired, 
-                    or inside if you want nav. Currently keeping outside to match "Audio Essay" feel 
-                    based on its full-screen styling? 
-                    Actually, Presentation.tsx has fixed position full screen. 
-                    Let's keep it parallel to Layout so it doesn't get double nav.
-                */}
                 <Route path="/presentation" element={<Presentation />} />
             </Routes>
         </Router>

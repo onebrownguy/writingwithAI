@@ -15,7 +15,7 @@ export default function Home() {
                         width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', border: '1px solid rgba(0,242,234,0.3)'
                     }}>
-                        <Compass size={64} color="#00f2ea" />
+                        <Compass size={64} color="var(--accent-cyan)" />
                     </div>
                     <h1 style={{ marginBottom: '1rem' }}>
                         The <span className="text-gradient">Centaur's</span> Compass
@@ -28,7 +28,7 @@ export default function Home() {
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             style={{
-                                background: 'linear-gradient(90deg, #7600ff, #ff0050)',
+                                background: 'linear-gradient(90deg, var(--accent-purple), var(--accent-pink))',
                                 padding: '1rem 2rem', fontSize: '1.1rem',
                                 boxShadow: '0 0 30px rgba(118, 0, 255, 0.3)'
                             }}
@@ -48,7 +48,7 @@ export default function Home() {
 
                         <Link to="/compass" style={{ textDecoration: 'none', color: 'inherit' }}>
                             <motion.div className="glass-panel" whileHover={{ y: -5 }}>
-                                <Compass size={32} color="#00f2ea" style={{ marginBottom: '1rem' }} />
+                                <Compass size={32} color="var(--accent-cyan)" style={{ marginBottom: '1rem' }} />
                                 <h3>The Compass</h3>
                                 <p style={{ color: 'var(--text-secondary)' }}>My personal framework for surviving and thriving in the age of AI.</p>
                             </motion.div>
@@ -64,7 +64,7 @@ export default function Home() {
 
                         <Link to="/horizon" style={{ textDecoration: 'none', color: 'inherit' }}>
                             <motion.div className="glass-panel" whileHover={{ y: -5 }}>
-                                <SunDim size={32} color="#eab308" style={{ marginBottom: '1rem' }} />
+                                <SunDim size={32} color="var(--accent-yellow)" style={{ marginBottom: '1rem' }} />
                                 <h3>The Horizon</h3>
                                 <p style={{ color: 'var(--text-secondary)' }}>Envisioning the future career landscape and the "Super-Individual".</p>
                             </motion.div>

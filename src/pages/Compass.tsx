@@ -34,13 +34,13 @@ export default function CompassPage() {
                 </p>
 
                 <div className="grid-3">
-                    {principles.map((p, i) => (
+                    {principles.map((p) => (
                         <motion.div
-                            key={i}
+                            key={p.title}
                             className="glass-panel"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: i * 0.2 }}
+                            transition={{ delay: principles.indexOf(p) * 0.2 }}
                             style={{ minHeight: '300px', display: 'flex', flexDirection: 'column' }}
                         >
                             <div style={{ marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', width: 'fit-content', padding: '1rem', borderRadius: '50%' }}>
